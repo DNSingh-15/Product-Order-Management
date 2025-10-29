@@ -1,10 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-
-export interface Product {
-  id: number;
-  name: string;
-  price: number;
-}
+import { Product, CreateProductDto, UpdateProductDto } from './product.schema';
 
 @Injectable()
 export class ProductService {
@@ -33,15 +28,21 @@ export class ProductService {
     return product;
   }
 
-  create(product: Omit<Product, 'id'>) {
-    const newProduct = { id: this.counter++, ...product };
+  create(product: CreateProductDto) {
+    const now = new Date().toISOString();
+    const newProduct: Product = {
+      id: this.counter++,
+      createdAt: now,
+      updatedAt: now,
+      ...product,
+    };
     this.products.push(newProduct);
     return newProduct;
   }
 
-  update(id: number, product: Partial<Omit<Product, 'id'>>) {
+  update(id: number, product: UpdateProductDto) {
     const existing = this.findById(id);
-    Object.assign(existing, product);
+    Object.assign(existing, product, { updatedAt: new Date().toISOString() });
     return { message: 'Product updated successfully', product: existing };
   }
 

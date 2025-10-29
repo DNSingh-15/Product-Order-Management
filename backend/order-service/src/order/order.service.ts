@@ -7,16 +7,7 @@ import {
 } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { lastValueFrom, timeout } from 'rxjs';
-
-export interface Order {
-  id: number;
-  productId: number;
-  quantity: number;
-  totalPrice: number;
-  createdAt: string;
-  updatedAt: string;
-  product?: any;
-}
+import { Order, CreateOrderDto, UpdateOrderDto, Product } from './order.schema';
 
 @Injectable()
 export class OrderService {
@@ -27,7 +18,7 @@ export class OrderService {
     @Inject('PRODUCT_SERVICE') private readonly productClient: ClientProxy,
   ) {}
 
-  async create(orderData: { productId: number; quantity: number }) {
+  async create(orderData: CreateOrderDto) {
     if (!orderData?.productId || !orderData?.quantity)
       throw new BadRequestException('productId and quantity are required');
 
@@ -38,7 +29,9 @@ export class OrderService {
     }
 
     const product = await lastValueFrom(
-      this.productClient.send({ cmd: 'get_product_by_id' }, orderData.productId).pipe(timeout(3000)),
+      this.productClient
+        .send<Product>({ cmd: 'get_product_by_id' }, orderData.productId)
+        .pipe(timeout(3000)),
     );
 
     if (!product) throw new NotFoundException(`Product ${orderData.productId} not found`);
@@ -71,7 +64,7 @@ export class OrderService {
     };
   }
 
-  update(id: number, patch: Partial<Pick<Order, 'quantity'>>) {
+  update(id: number, patch: UpdateOrderDto) {
     const order = this.orders.find((o) => o.id === id);
     if (!order) throw new NotFoundException('Order not found');
 
