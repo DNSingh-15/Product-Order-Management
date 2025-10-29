@@ -1,33 +1,38 @@
-
 # 🌐 Revest Solutions - Fullstack Assignment (Monorepo)
 
-A **microservice-based fullstack application** demonstrating modular architecture using **NestJS**, **Next.js**, and **TypeScript**.  
-The system consists of two backend services (`Product Service`, `Order Service`) communicating via **TCP microservice transport**,  
-and a modern **Next.js + MUI frontend** for seamless interaction.
+A **microservice-based fullstack application** built with **NestJS**, **Next.js**, and **TypeScript**.  
+Includes two backend services (`Product Service`, `Order Service`) communicating via **TCP**,  
+and a modern **Next.js + MUI frontend** for a seamless user experience.
 
 ---
 
-## 🧭 Quick Start Guide
-
-Follow these steps to clone and run the project locally:
+## 🚀 Quick Start
 
 ### 1️⃣ Clone the Repository
 ```bash
-git clone https://github.com/<your-username>/revest-solutions.git
-cd revest-solutions
+git clone https://github.com/DNSingh-15/Product-Order-Management.git
+cd Product-Order-Management
 ```
 
-2️⃣ Install Dependencies
+---
 
-Each service and the frontend maintain their own dependencies.
-Run the following inside each folder:
+## 2️⃣ Install Dependencies
+```bash
+📦 Frontend:              cd frontend && npm install
+🧠 Backend:        cd /backend && npm install
+⚙️  Order Service:         cd backend/order-service && npm install
+🧩 Product Service:       cd backend/product-service && npm install
+```
 
-cd backend/product-service
-npm install
-cd ../order-service
-npm install
-cd ../../frontend
-npm install
+---
+
+## 3️⃣ Run the Applications
+* open 2 terminal one for frontend and other is backend
+
+```bash
+📦 Frontend:              cd frontend && open terminal then run:  npm run dev
+🧠 Backend:        cd /backend && open terminal then run: npm start
+```
 
 ---
 
