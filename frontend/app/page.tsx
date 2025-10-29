@@ -72,7 +72,7 @@ export default function HomePage() {
         }}
       >
         <Typography variant="h5" fontWeight="bold" textAlign="center" mb={3}>
-          Dynamic Signup Form
+          Signup Form
         </Typography>
 
         <form onSubmit={handleSubmit(onSubmit)}>

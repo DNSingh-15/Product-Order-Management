@@ -28,6 +28,25 @@ interface Product {
   price: number;
 }
 
+const productFormFields = [
+  {
+    name: 'name',
+    label: 'Name',
+    placeholder: 'Enter product name',
+    type: 'text',
+    rules: { required: 'Name is required' },
+    sx: { flex: 1, minWidth: 180 },
+  },
+  {
+    name: 'price',
+    label: 'Price',
+    placeholder: 'Enter price',
+    type: 'number',
+    rules: { required: 'Price is required' },
+    sx: { flex: 1, minWidth: 120 },
+  },
+];
+
 export default function ProductsPage() {
   const { register, handleSubmit, reset, setValue } = useForm<Product>();
   const [products, setProducts] = useState<Product[]>([]);
@@ -60,10 +79,10 @@ export default function ProductsPage() {
 
   const handleEdit = (product: Product) => {
     setEditingId(product.id || null);
-    // Reset first to clear previous placeholders, then set values
     reset();
-    setValue('name', product.name);
-    setValue('price', product.price);
+    Object.entries(product).forEach(([key, value]) => {
+      if (key in product) setValue(key as keyof Product, value as any);
+    });
   };
 
   useEffect(() => {
@@ -72,7 +91,6 @@ export default function ProductsPage() {
 
   return (
     <Box sx={{ p: 3, bgcolor: '#f9f9f9', minHeight: '100vh' }}>
-      {/* Header */}
       <Stack direction="row" justifyContent="space-between" alignItems="center" mb={2}>
         <Typography variant="h5" fontWeight="bold">
           Product Management
@@ -91,35 +109,35 @@ export default function ProductsPage() {
         </Stack>
       </Stack>
 
-      {/* Form */}
+      {/* Dynamic Form */}
       <Paper sx={{ p: 2, mb: 2 }}>
         <Typography variant="subtitle1" mb={1} fontWeight="bold">
           {editingId ? 'Update Product' : 'Add Product'}
         </Typography>
+
         <form
           onSubmit={handleSubmit(onSubmit)}
-          style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', alignItems: 'center' }}
+          style={{
+            display: 'flex',
+            gap: '0.5rem',
+            flexWrap: 'wrap',
+            alignItems: 'center',
+          }}
         >
-          <TextField
-            label="Name"
-            placeholder="Enter product name"
-            {...register('name', { required: true })}
-            variant="outlined"
-            size="small"
-            fullWidth={false}
-            sx={{ flex: 1, minWidth: 180 }}
-            InputLabelProps={{ shrink: true }} // ✅ Fixes label/placeholder overlap
-          />
-          <TextField
-            label="Price"
-            placeholder="Enter price"
-            type="number"
-            {...register('price', { required: true })}
-            variant="outlined"
-            size="small"
-            sx={{ flex: 1, minWidth: 120 }}
-            InputLabelProps={{ shrink: true }} // ✅ Prevents collapsing on edit
-          />
+          {productFormFields.map((field) => (
+            <TextField
+              key={field.name}
+              label={field.label}
+              placeholder={field.placeholder}
+              type={field.type}
+              {...register(field.name as keyof Product, field.rules)}
+              variant="outlined"
+              size="small"
+              sx={field.sx}
+              InputLabelProps={{ shrink: true }}
+            />
+          ))}
+
           <Button
             type="submit"
             variant="contained"
@@ -129,6 +147,7 @@ export default function ProductsPage() {
           >
             {editingId ? 'Save' : 'Add'}
           </Button>
+
           {editingId && (
             <Button
               variant="outlined"
@@ -146,18 +165,26 @@ export default function ProductsPage() {
         </form>
       </Paper>
 
-      {/* Product List */}
       <Paper sx={{ p: 2 }}>
         <Typography variant="subtitle1" mb={1} fontWeight="bold">
           Product List
         </Typography>
+
         <Table size="small" sx={{ tableLayout: 'fixed' }}>
           <TableHead>
             <TableRow>
-              <TableCell sx={{ width: '10%' }}><b>ID</b></TableCell>
-              <TableCell sx={{ width: '40%' }}><b>Name</b></TableCell>
-              <TableCell sx={{ width: '25%' }}><b>Price</b></TableCell>
-              <TableCell align="center" sx={{ width: '25%' }}><b>Actions</b></TableCell>
+              <TableCell sx={{ width: '10%' }}>
+                <b>ID</b>
+              </TableCell>
+              <TableCell sx={{ width: '40%' }}>
+                <b>Name</b>
+              </TableCell>
+              <TableCell sx={{ width: '25%' }}>
+                <b>Price</b>
+              </TableCell>
+              <TableCell align="center" sx={{ width: '25%' }}>
+                <b>Actions</b>
+              </TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -165,7 +192,7 @@ export default function ProductsPage() {
               <TableRow key={p.id} hover>
                 <TableCell>{p.id}</TableCell>
                 <TableCell>{p.name}</TableCell>
-                <TableCell>{p.price}</TableCell> {/* ✅ Show raw price */}
+                <TableCell>{p.price}</TableCell>
                 <TableCell align="center">
                   <Stack direction="row" spacing={0.5} justifyContent="center">
                     <Tooltip title="Edit">
@@ -189,7 +216,6 @@ export default function ProductsPage() {
           </TableBody>
         </Table>
 
-        {/* Pagination */}
         <Stack alignItems="center" mt={2}>
           <Pagination
             size="small"

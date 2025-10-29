@@ -20,7 +20,7 @@ import {
   Pagination,
   Tooltip,
 } from '@mui/material';
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import api from '@/services/api';
 import { Edit, Delete, Save, Cancel } from '@mui/icons-material';
 
@@ -38,8 +38,27 @@ interface Order {
   product?: Product;
 }
 
+const orderFormFields = [
+  {
+    name: 'productId',
+    label: 'Product',
+    type: 'select',
+    placeholder: 'Select Product',
+    rules: { required: 'Product is required' },
+    sx: { minWidth: 200 },
+  },
+  {
+    name: 'quantity',
+    label: 'Quantity',
+    type: 'number',
+    placeholder: 'Enter quantity',
+    rules: { required: 'Quantity is required' },
+    sx: { minWidth: 150 },
+  },
+];
+
 export default function OrdersPage() {
-  const { register, handleSubmit, reset } = useForm<Order>();
+  const { control, register, handleSubmit, reset } = useForm<Order>();
   const [orders, setOrders] = useState<Order[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [editingOrderId, setEditingOrderId] = useState<number | null>(null);
@@ -58,6 +77,11 @@ export default function OrdersPage() {
     const res = await api.get('http://localhost:3001/products');
     setProducts(res.data.data);
   };
+
+  useEffect(() => {
+    fetchOrders();
+    fetchProducts();
+  }, []);
 
   const onSubmit = async (data: Order) => {
     await api.post('http://localhost:3002/orders', {
@@ -86,14 +110,8 @@ export default function OrdersPage() {
     fetchOrders(page);
   };
 
-  useEffect(() => {
-    fetchOrders();
-    fetchProducts();
-  }, []);
-
   return (
     <Box sx={{ p: 3, bgcolor: '#f9f9f9', minHeight: '100vh' }}>
-      {/* Header */}
       <Stack direction="row" justifyContent="space-between" alignItems="center" mb={2}>
         <Typography variant="h5" fontWeight="bold">
           Order Management
@@ -112,59 +130,90 @@ export default function OrdersPage() {
         </Stack>
       </Stack>
 
-      {/* Create Order Form */}
       <Paper sx={{ p: 2, mb: 2 }}>
         <Typography variant="subtitle1" mb={1} fontWeight="bold">
           Create Order
         </Typography>
+
         <form
           onSubmit={handleSubmit(onSubmit)}
-          style={{ display: 'flex', gap: '0.6rem', flexWrap: 'wrap', alignItems: 'center' }}
+          style={{
+            display: 'flex',
+            gap: '0.6rem',
+            flexWrap: 'wrap',
+            alignItems: 'center',
+          }}
         >
-          <Select
-            {...register('productId', { required: true })}
-            defaultValue=""
-            displayEmpty
-            size="small"
-            sx={{ minWidth: 200 }}
-          >
-            <MenuItem value="" disabled>
-              Select Product
-            </MenuItem>
-            {products.map((p) => (
-              <MenuItem key={p.id} value={p.id}>
-                {p.name} (${p.price})
-              </MenuItem>
-            ))}
-          </Select>
-          <TextField
-            label="Quantity"
-            type="number"
-            size="small"
-            {...register('quantity', { required: true })}
-            variant="outlined"
-            placeholder="Enter quantity"
-            InputLabelProps={{ shrink: true }}
-          />
+          {orderFormFields.map((field) =>
+            field.type === 'select' ? (
+              <Controller
+                key={field.name}
+                name={field.name as keyof Order}
+                control={control}
+                rules={field.rules}
+                defaultValue={0}
+                render={({ field: controllerField }) => (
+                  <Select
+                    {...controllerField}
+                    displayEmpty
+                    size="small"
+                    sx={field.sx}
+                  >
+                    <MenuItem value="" disabled>
+                      {field.placeholder}
+                    </MenuItem>
+                    {products.map((p) => (
+                      <MenuItem key={p.id} value={p.id}>
+                        {p.name} (${p.price})
+                      </MenuItem>
+                    ))}
+                  </Select>
+                )}
+              />
+            ) : (
+              <TextField
+                key={field.name}
+                label={field.label}
+                placeholder={field.placeholder}
+                type={field.type}
+                size="small"
+                {...register(field.name as keyof Order, field.rules)}
+                variant="outlined"
+                sx={field.sx}
+                InputLabelProps={{ shrink: true }}
+              />
+            )
+          )}
+
           <Button type="submit" variant="contained" size="small">
             Create
           </Button>
         </form>
       </Paper>
 
-      {/* Orders List */}
       <Paper sx={{ p: 2 }}>
         <Typography variant="subtitle1" mb={1} fontWeight="bold">
           Orders List
         </Typography>
+
         <Table size="small" sx={{ tableLayout: 'fixed' }}>
           <TableHead>
             <TableRow>
-              <TableCell><b>ID</b></TableCell>
-              <TableCell><b>Product</b></TableCell>
-              <TableCell><b>Quantity</b></TableCell>
-              <TableCell><b>Total Price</b></TableCell>
-              <TableCell align="center"><b>Actions</b></TableCell>
+              <TableCell>
+                <b>ID</b>
+              </TableCell>
+              <TableCell>
+                <b>Product</b>
+              </TableCell>
+              <TableCell>
+                <b>Quantity</b>
+              </TableCell>
+              <TableCell>
+                <b>Total Price</b>
+              </TableCell>
+              <TableCell align="center">
+                <b>Actions</b>
+              </TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -190,12 +239,20 @@ export default function OrdersPage() {
                   {editingOrderId === o.id ? (
                     <Stack direction="row" spacing={0.5} justifyContent="center">
                       <Tooltip title="Save">
-                        <IconButton size="small" color="success" onClick={() => handleUpdate(o.id!)}>
+                        <IconButton
+                          size="small"
+                          color="success"
+                          onClick={() => handleUpdate(o.id!)}
+                        >
                           <Save fontSize="small" />
                         </IconButton>
                       </Tooltip>
                       <Tooltip title="Cancel">
-                        <IconButton size="small" color="warning" onClick={() => setEditingOrderId(null)}>
+                        <IconButton
+                          size="small"
+                          color="warning"
+                          onClick={() => setEditingOrderId(null)}
+                        >
                           <Cancel fontSize="small" />
                         </IconButton>
                       </Tooltip>
@@ -203,12 +260,20 @@ export default function OrdersPage() {
                   ) : (
                     <Stack direction="row" spacing={0.5} justifyContent="center">
                       <Tooltip title="Edit">
-                        <IconButton size="small" color="primary" onClick={() => handleEdit(o)}>
+                        <IconButton
+                          size="small"
+                          color="primary"
+                          onClick={() => handleEdit(o)}
+                        >
                           <Edit fontSize="small" />
                         </IconButton>
                       </Tooltip>
                       <Tooltip title="Delete">
-                        <IconButton size="small" color="error" onClick={() => o.id && handleDelete(o.id)}>
+                        <IconButton
+                          size="small"
+                          color="error"
+                          onClick={() => o.id && handleDelete(o.id)}
+                        >
                           <Delete fontSize="small" />
                         </IconButton>
                       </Tooltip>
