@@ -1,0 +1,12 @@
+{
+  "name": "backend",
+  "private": true,
+  "scripts": {
+    "start:product": "cd product-service && npm run start:dev",
+    "start:order": "cd order-service && npm run start:dev",
+    "start": "concurrently \"npm run start:product\" \"npm run start:order\""
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
