@@ -1,4 +1,4 @@
-# 🌐 Revest Solutions - Fullstack Assignment (Monorepo)
+# 🌐 Product Order Management - Fullstack Project
 
 A **microservice-based fullstack application** built with **NestJS**, **Next.js**, and **TypeScript**.  
 Includes two backend services (`Product Service`, `Order Service`) communicating via **TCP**,  
